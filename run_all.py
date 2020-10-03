@@ -15,15 +15,12 @@ from settings import *
 # delta = end-start
 # print('time elapsed = ' + str(delta))
 
-try:
 
-	start = time.time()
+start = time.time()
 
-	#df_all = Analyze_all_MP ()
-	df_all = Analyze_all()
+#df_all = Analyze_all_MP ()
+df_all = Analyze_all()
 
-except Exception as ex:
-	print('Function failed')
 
 end = time.time()
 delta = end-start

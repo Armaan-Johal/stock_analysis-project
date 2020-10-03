@@ -590,7 +590,7 @@ def Analyze_all ():
 
 		try:
 			sym = row.symbol
-			cname = row['name']
+			cname = row['companyName']
 			simp_dff_all = Analyze_simple(sym)
 			simp_dff = simp_dff_all[0]
 			simp_dff['Exchange'] = row['exchange']
@@ -607,7 +607,7 @@ def Analyze_all ():
 			print([sym, cname])
 			
 		except:
-			print("Error " + row.symbol + ": " + row['name']+ "\n")
+			print("Error " + row.symbol + ": " + row['companyName']+ "\n")
 			continue
 
 			
