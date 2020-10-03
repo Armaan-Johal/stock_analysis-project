@@ -19,7 +19,8 @@ try:
 
 	start = time.time()
 
-	df_all = Analyze_all_MP ()
+	#df_all = Analyze_all_MP ()
+	df_all = Analyze_all()
 
 except Exception as ex:
 	print('Function failed')

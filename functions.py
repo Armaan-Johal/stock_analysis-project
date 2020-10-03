@@ -16,7 +16,7 @@ def getProfile (sym):
 		df = pd.DataFrame(js)
 	except:
 		df = []
-		print('AJ Function getProfile() failed')
+		print('AJ Function getProfile() failed :' + sym)
 		
 	return df
 
@@ -33,7 +33,7 @@ def getMetrics (sym):
 		df = pd.DataFrame(js)
 	except:
 		df = []
-		print('AJ Function getMetrics() failed')
+		print('AJ Function getMetrics() failed :' + sym)
 		
 	return df
 
@@ -51,7 +51,7 @@ def getStock (sym):
 		df.set_index('date', drop=True, inplace=True)
 	except:
 		df = []
-		print('AJ Function getStock() failed')
+		print('AJ Function getStock() failed :' + sym)
 	return df
 
 # get SP500 historical daily price
@@ -93,6 +93,23 @@ def getAllSymbols ():
 	return df
 
 
+def getAllScreenedSymbols ():
+	try:
+		
+		screen = 'NYSE,NASDAQ'
+		url = 'https://financialmodelingprep.com/api/v3/stock-screener?exchange=' + screen + '&apikey=6b9e3543ba839a1f8179c1365b6e2e8f'
+
+		data = urlopen(url).read().decode('utf-8')
+
+		js = json.loads(data)
+		df = pd.DataFrame(js)
+		
+	except:
+		df = []
+		print('AJ Function getAllScreenedSymbols() failed')
+	return df
+
+
 
 def getDCF (sym):
 
@@ -106,7 +123,7 @@ def getDCF (sym):
 
 	except:
 		df = []
-		print('AJ Function getDCF() failed')
+		print('AJ Function getDCF() failed :' + sym)
 		
 	return df
 
@@ -130,7 +147,7 @@ def getFinancials (sym):
 		
 	except:
 		df = []
-		print('AJ Function getFinancials() failed')
+		print('AJ Function getFinancials() failed :' + sym)
 
 	return df
 
@@ -152,7 +169,7 @@ def getBS (sym):
 		
 	except:
 		df = []
-		print('AJ Function getBS() failed')
+		print('AJ Function getBS() failed :' + sym)
 
 	return df
 
@@ -175,7 +192,7 @@ def getCS (sym):
 		
 	except:
 		df = []
-		print('AJ Function getCS() failed')
+		print('AJ Function getCS() failed :' + sym)
 
 	return df 
 
@@ -216,7 +233,7 @@ def getSO (sym):
 		
 	except:
 		df = []
-		print('AJ Function getSO() failed')
+		print('AJ Function getSO() failed :' + sym)
 
 	return df
 
@@ -295,7 +312,7 @@ def FreeCashFlow (sym):
 		
 	except:
 		rev_Inc_FCFE_df = []
-		print ('AJ Function FreeCashFlow() failed')
+		print ('AJ Function FreeCashFlow() failed :' + sym)
 		
 	return rev_Inc_FCFE_df
 	
@@ -378,7 +395,7 @@ def ReqRateofReturn (sym):
 	except:
 		
 		allRR_df = []
-		print ('AJ Function ReqRateofReturn() failed')
+		print ('AJ Function ReqRateofReturn() failed :' + sym)
 		
 	return allRR_df 
 
@@ -456,7 +473,7 @@ def FairValue (sym):
 	except:
 		
 		allFV_df = []
-		print('AJ Function FairValue() failed')
+		print('AJ Function FairValue() failed :' + sym)
 		
 	return allFV_df
 	
@@ -489,7 +506,7 @@ def getCorr_SP500 (sym, d):
 		
 	except:
 		c = np.nan
-		print('AJ Function getCorr_SP500() failed')
+		print('AJ Function getCorr_SP500() failed :' + sym)
 	
 	return c
 	
@@ -551,7 +568,7 @@ def Analyze_simple (sym):
 
 	except:
 		df = []
-		print('AJ Function Analyze_simple() failed')
+		print('AJ Function Analyze_simple() failed :' + sym)
 	
 	return [df, profile_df, dcf_df, metrics_df, fv_df]
 
@@ -559,11 +576,13 @@ def Analyze_simple (sym):
 # Analyze all the companies on the NYSE, NYSE Arc, and NASDAQ. Returns a dataframe with all relevant data (from Analyze_simple())
 def Analyze_all ():
 
-	symbols_df = getAllSymbols().head(10)
+	symbols_df = getAllScreenedSymbols().head(10)
 	symbols_simp_df = pd.DataFrame()
 	symbols_prof_df = pd.DataFrame()
 	symbols_met_df = pd.DataFrame()
 	symbols_f_df = pd.DataFrame()
+
+	deleteJsonFiles ()
 
 	for i, row in symbols_df.iterrows():
 		simp_dff = []
@@ -581,15 +600,16 @@ def Analyze_all ():
 			f_df = simp_dff_all[4]
 
 			symbols_simp_df = symbols_simp_df.append(simp_dff, ignore_index=True)
-			symbols_prof_df = symbols_simp_df.append(prof_df, ignore_index=True)
-			symbols_met_df = symbols_simp_df.append(met_df, ignore_index=True)
-			symbols_f_df = symbols_simp_df.append(f_df, ignore_index=True)
+			symbols_prof_df = symbols_prof_df.append(prof_df, ignore_index=True)
+			symbols_met_df = symbols_met_df.append(met_df, ignore_index=True)
+			symbols_f_df = symbols_f_df.append(f_df, ignore_index=True)
 
 			print([sym, cname])
 			
 		except:
 			print("Error " + row.symbol + ": " + row['name']+ "\n")
 			continue
+
 			
 	float_cols = ['Market Cap (M)', 'EV/EBITDA', 'Price / Earnings Ratio', 'Beta', '30 Day SP500 Correlation', '1 Year SP500 Correlation', '3 Year SP500 Correlation', 'Stock Price', 'DCF Fair Value', 'AJ DCF Fair Value', 'Market Premium (%)', 'AJ Market Premium (%)', 'Average Market Premium (%)', 'Dividend Yield (%)', 'Current Ratio', 'FCF Yield (%)', 'Debt to Equity', 'ROE (%)', 'Price / Book Ratio', '3 Month SP500 Correlation', '10 Year SP500 Correlation']
 	symbols_simp_df[float_cols] = symbols_simp_df[float_cols].astype('float').round(2)
@@ -630,6 +650,19 @@ def Analyze_all ():
 	df = df.replace(-np.inf, np.nan)
 	df = df.replace(np.inf, np.nan)
 
+
+	df_jsonFile = jsonPath + 'df.json'
+	profile_df_jsonFile = jsonPath + 'profile_df.json'
+	metrics_df_jsonFile = jsonPath + 'metrics_df.json'
+	fv_df_jsonFile = jsonPath + 'fv_df.json'
+
+	df.to_json(df_jsonFile)
+	symbols_prof_df.to_json(profile_df_jsonFile)
+	symbols_met_df.to_json(metrics_df_jsonFile)
+	symbols_f_df.to_json(fv_df_jsonFile)
+
+
+
 	
 	return df, symbols_prof_df, symbols_met_df, symbols_f_df
 
@@ -651,78 +684,78 @@ def round_df (df, n):
 
 def Analyze_simple_file (sym, exc):
 	
-	try:
-		df = pd.DataFrame(index=range(1))
-		profile_df = getProfile(sym)
-		dcf_df = getDCF(sym)
-		metrics_df = getMetrics(sym).round(4)
-		fv_df = FairValue(sym)
+	#try:
+	df = pd.DataFrame(index=range(1))
+	profile_df = getProfile(sym)
+	dcf_df = getDCF(sym)
+	metrics_df = getMetrics(sym).round(4)
+	fv_df = FairValue(sym)
 
-		df['Company'] = profile_df['companyName'][0] #
-		df['Ticker'] = profile_df['symbol'][0] #
-		df['Exchange'] = exc
-		df['Sector'] = profile_df['sector'][0] #
-		df['Industry'] = profile_df['industry'][0] #
-		df['Market Cap (M)'] = profile_df['mktCap'][0] #
-		df['Market Cap (M)']= df['Market Cap (M)'].astype('float')/1000000 #
+	df['Company'] = profile_df['companyName'][0] #
+	df['Ticker'] = profile_df['symbol'][0] #
+	df['Exchange'] = exc
+	df['Sector'] = profile_df['sector'][0] #
+	df['Industry'] = profile_df['industry'][0] #
+	df['Market Cap (M)'] = profile_df['mktCap'][0] #
+	df['Market Cap (M)']= df['Market Cap (M)'].astype('float')/1000000 #
+	
+	df['EV/EBITDA'] = metrics_df['enterpriseValueOverEBITDA'][0] #
+	df['Price / Earnings Ratio'] = metrics_df['peRatio'][0] #
+	if metrics_df['dividendYield'][0]: df['Dividend Yield (%)'] = metrics_df['dividendYield'][0]*100
+	df['Current Ratio'] = metrics_df['currentRatio'][0]
+	df['FCF Yield (%)'] = metrics_df['freeCashFlowYield'][0]*100
+	df['Debt to Equity'] = metrics_df['debtToEquity'][0]
+	df['ROE (%)'] = metrics_df['roe'][0]*100
+	df['Price / Book Ratio'] = metrics_df['pbRatio'][0]
+	
+	df['Beta'] = profile_df['beta'][0] #
+	df['30 Day SP500 Correlation'] = getCorr_SP500(sym, 21) #
+	df['3 Month SP500 Correlation'] = getCorr_SP500(sym, 63)
+	df['1 Year SP500 Correlation'] = getCorr_SP500(sym, 253) #
+	df['3 Year SP500 Correlation'] = getCorr_SP500(sym, 759) #
+	df['10 Year SP500 Correlation'] = getCorr_SP500(sym, 2530)
+	df['Stock Price'] = profile_df['price'][0] #
+	if dcf_df['dcf'][0] == 0:
+		df['DCF Fair Value'] = np.nan
+	else:
+		df['DCF Fair Value'] = dcf_df['dcf'][0] #
+
+	if fv_df['Fair Value'][0] >=0:
+		df['AJ DCF Fair Value'] = fv_df['Fair Value'][0].round(3) #
+		df['AJ DCF Fair Value'] = df['AJ DCF Fair Value'].replace(-np.inf, np.nan)
+		df['AJ DCF Fair Value'] = df['AJ DCF Fair Value'].replace(np.inf, np.nan)
 		
-		df['EV/EBITDA'] = metrics_df['enterpriseValueOverEBITDA'][0] #
-		df['Price / Earnings Ratio'] = metrics_df['peRatio'][0] #
-		if metrics_df['dividendYield'][0]: df['Dividend Yield (%)'] = metrics_df['dividendYield'][0]*100
-		df['Current Ratio'] = metrics_df['currentRatio'][0]
-		df['FCF Yield (%)'] = metrics_df['freeCashFlowYield'][0]*100
-		df['Debt to Equity'] = metrics_df['debtToEquity'][0]
-		df['ROE (%)'] = metrics_df['roe'][0]*100
-		df['Price / Book Ratio'] = metrics_df['pbRatio'][0]
+		fv_list = [profile_df['price'][0], dcf_df['dcf'][0]]
+		df['Market Premium (%)'] = (100*(profile_df['price'][0] - df['DCF Fair Value']) / profile_df['price'][0]).round(3) #     #min(fv_list)).round(3)
+		df['Market Premium (%)'] = df['Market Premium (%)'].replace(np.inf, np.nan)
+		df['Market Premium (%)'] =  df['Market Premium (%)'].replace(-np.inf, np.nan)
 		
-		df['Beta'] = profile_df['beta'][0] #
-		df['30 Day SP500 Correlation'] = getCorr_SP500(sym, 21) #
-		df['3 Month SP500 Correlation'] = getCorr_SP500(sym, 63)
-		df['1 Year SP500 Correlation'] = getCorr_SP500(sym, 253) #
-		df['3 Year SP500 Correlation'] = getCorr_SP500(sym, 759) #
-		df['10 Year SP500 Correlation'] = getCorr_SP500(sym, 2530)
-		df['Stock Price'] = profile_df['price'][0] #
-		if dcf_df['dcf'][0] == 0:
-			df['DCF Fair Value'] = np.nan
-		else:
-			df['DCF Fair Value'] = dcf_df['dcf'][0] #
-
-		if fv_df['Fair Value'][0] >=0:
-			df['AJ DCF Fair Value'] = fv_df['Fair Value'][0].round(3) #
-			df['AJ DCF Fair Value'] = df['AJ DCF Fair Value'].replace(-np.inf, np.nan)
-			df['AJ DCF Fair Value'] = df['AJ DCF Fair Value'].replace(np.inf, np.nan)
-			
-			fv_list = [profile_df['price'][0], dcf_df['dcf'][0]]
-			df['Market Premium (%)'] = (100*(profile_df['price'][0] - df['DCF Fair Value']) / profile_df['price'][0]).round(3) #     #min(fv_list)).round(3)
-			df['Market Premium (%)'] = df['Market Premium (%)'].replace(np.inf, np.nan)
-			df['Market Premium (%)'] =  df['Market Premium (%)'].replace(-np.inf, np.nan)
-			
-			df['AJ Market Premium (%)'] = fv_df['Market Premium (%)'][0].round(3) #
-			df['AJ Market Premium (%)'] = df['AJ Market Premium (%)'].replace(-np.inf, np.nan)
-			df['AJ Market Premium (%)'] = df['AJ Market Premium (%)'].replace(np.inf, np.nan)
-			
-			df['Average Market Premium (%)'] = np.nanmean([df['AJ Market Premium (%)'][0], df['Market Premium (%)'][0]]).round(3) #    #((df['AJ Market Premium (%)']+df['Market Premium (%)'])/2).round(3)
+		df['AJ Market Premium (%)'] = fv_df['Market Premium (%)'][0].round(3) #
+		df['AJ Market Premium (%)'] = df['AJ Market Premium (%)'].replace(-np.inf, np.nan)
+		df['AJ Market Premium (%)'] = df['AJ Market Premium (%)'].replace(np.inf, np.nan)
+		
+		df['Average Market Premium (%)'] = np.nanmean([df['AJ Market Premium (%)'][0], df['Market Premium (%)'][0]]).round(3) #    #((df['AJ Market Premium (%)']+df['Market Premium (%)'])/2).round(3)
 
 
 
 
-		#appending dataframes to json
-		df_jsonFile = jsonPath + 'df.json'
-		profile_df_jsonFile = jsonPath + 'profile_df.json'
-		dcf_df_jsonFile = jsonPath + 'dcf_df.json'
-		metrics_df_jsonFile = jsonPath + 'metrics_df.json'
-		fv_df_jsonFile = jsonPath + 'fv_df.json'
+	#appending dataframes to json
+	df_jsonFile = jsonPath + 'df.json'
+	profile_df_jsonFile = jsonPath + 'profile_df.json'
+	dcf_df_jsonFile = jsonPath + 'dcf_df.json'
+	metrics_df_jsonFile = jsonPath + 'metrics_df.json'
+	fv_df_jsonFile = jsonPath + 'fv_df.json'
 
-		appendDF(df, df_jsonFile)
-		appendDF(profile_df, profile_df_jsonFile)
-		appendDF(dcf_df, dcf_df_jsonFile)
-		appendDF(metrics_df, metrics_df_jsonFile)
-		appendDF(fv_df, fv_df_jsonFile)
+	appendDF(df, df_jsonFile)
+	appendDF(profile_df, profile_df_jsonFile)
+	appendDF(dcf_df, dcf_df_jsonFile)
+	appendDF(metrics_df, metrics_df_jsonFile)
+	appendDF(fv_df, fv_df_jsonFile)
 
 
-	except Exception as ex:
-		df = []
-		print('AJ Function Analyze_simple_file() failed')
+	# except Exception as ex:
+	# 	df = []
+	# 	print('AJ Function Analyze_simple_file() failed :' + sym)
 
 	return
 
@@ -797,7 +830,7 @@ def Analyze_simple_wrapper (sym, exc):
 def Analyze_all_MP ():
 
 
-	symbols_df = getAllSymbols().head(n_securities)
+	symbols_df = getAllScreenedSymbols().head(n_securities)
 	symbols_simp_df = pd.DataFrame()
 	symbols_prof_df = pd.DataFrame()
 	symbols_met_df = pd.DataFrame()
@@ -822,7 +855,7 @@ def Analyze_all_MP ():
 			processes.append(p)
 			p.start()
 
-			time.sleep(4)
+			time.sleep(5)
 
 			print([sym, cname])
 

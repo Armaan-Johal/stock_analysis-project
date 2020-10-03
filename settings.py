@@ -1,3 +1,3 @@
 
 jsonPath = '/Users/armaanjohal/finance/stock_analysis-project/stockvenv/'
-n_securities = 50
+n_securities = 100
