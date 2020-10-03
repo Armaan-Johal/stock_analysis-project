@@ -40,3 +40,4 @@ import dash_html_components as html
 import plotly.express as px
 
 import multiprocessing
+import urllib.parse
