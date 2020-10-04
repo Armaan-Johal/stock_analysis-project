@@ -1,4 +1,10 @@
 
-jsonPath = '/Users/armaanjohal/finance/stock_analysis-project/stockvenv/'
-#jsonPath = '/home/consult/stock_analysis-project/'
-n_securities = 100
+rootDir = '/Users/armaanjohal/finance/stock_analysis-project/'
+jsonPath = rootDir + 'stockvenv/'
+
+#rootDir = '/home/consult/'
+#jsonPath = rootDir + 'stock_analysis-project/'
+
+outPath = rootDir + 'OUTPUT/'
+
+n_securities = 40   #8907

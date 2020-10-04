@@ -18,8 +18,8 @@ from settings import *
 
 start = time.time()
 
-#df_all = Analyze_all_MP ()
-df_all = Analyze_all()
+Analyze_all_MP ()
+#df_all = Analyze_all()
 
 
 end = time.time()

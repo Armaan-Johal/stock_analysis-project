@@ -713,80 +713,129 @@ def round_df (df, n):
 
 
 
+def writeToFile(sym, df, nm):
+
+	writeDir = outPath + sym
+	ts = datetime.strftime(datetime.now(), '%Y-%m-%d')
+	outFile = writeDir + '/' + nm + '__' + ts + '.json'
+
+	print('++++++++++++++++++++ writeToFile: sym = ' + sym + '-- df_name= ' + nm + '-- outFile = ' + outFile + '  ++++++++++++')
+	if os.path.isdir(writeDir):
+		df.to_json(outFile)
+
+	else:
+		os.makedirs(writeDir)
+		df.to_json(outFile)
+	return
+
+
+
+
+
+
+
 def Analyze_simple_file (sym, exc):
 	
-	#try:
-	df = pd.DataFrame(index=range(1))
-	profile_df = getProfile(sym)
-	dcf_df = getDCF(sym)
-	metrics_df = getMetrics(sym).round(4)
-	fv_df = FairValue(sym)
+	try:
+		df = pd.DataFrame(index=range(1))
+		profile_df = getProfile(sym)
+		dcf_df = getDCF(sym)
+		metrics_df = getMetrics(sym).round(4)
+		fv_df = FairValue(sym)
 
-	df['Company'] = profile_df['companyName'][0] #
-	df['Ticker'] = profile_df['symbol'][0] #
-	df['Exchange'] = exc
-	df['Sector'] = profile_df['sector'][0] #
-	df['Industry'] = profile_df['industry'][0] #
-	df['Market Cap (M)'] = profile_df['mktCap'][0] #
-	df['Market Cap (M)']= df['Market Cap (M)'].astype('float')/1000000 #
-	
-	df['EV/EBITDA'] = metrics_df['enterpriseValueOverEBITDA'][0] #
-	df['Price / Earnings Ratio'] = metrics_df['peRatio'][0] #
-	if metrics_df['dividendYield'][0]: df['Dividend Yield (%)'] = metrics_df['dividendYield'][0]*100
-	df['Current Ratio'] = metrics_df['currentRatio'][0]
-	df['FCF Yield (%)'] = metrics_df['freeCashFlowYield'][0]*100
-	df['Debt to Equity'] = metrics_df['debtToEquity'][0]
-	df['ROE (%)'] = metrics_df['roe'][0]*100
-	df['Price / Book Ratio'] = metrics_df['pbRatio'][0]
-	
-	df['Beta'] = profile_df['beta'][0] #
-	df['30 Day SP500 Correlation'] = getCorr_SP500(sym, 21) #
-	df['3 Month SP500 Correlation'] = getCorr_SP500(sym, 63)
-	df['1 Year SP500 Correlation'] = getCorr_SP500(sym, 253) #
-	df['3 Year SP500 Correlation'] = getCorr_SP500(sym, 759) #
-	df['10 Year SP500 Correlation'] = getCorr_SP500(sym, 2530)
-	df['Stock Price'] = profile_df['price'][0] #
-	if dcf_df['dcf'][0] == 0:
-		df['DCF Fair Value'] = np.nan
-	else:
-		df['DCF Fair Value'] = dcf_df['dcf'][0] #
-
-	if fv_df['Fair Value'][0] >=0:
-		df['AJ DCF Fair Value'] = fv_df['Fair Value'][0].round(3) #
-		df['AJ DCF Fair Value'] = df['AJ DCF Fair Value'].replace(-np.inf, np.nan)
-		df['AJ DCF Fair Value'] = df['AJ DCF Fair Value'].replace(np.inf, np.nan)
+		df['Company'] = profile_df['companyName'][0] #
+		df['Ticker'] = profile_df['symbol'][0] #
+		df['Exchange'] = exc
+		df['Sector'] = profile_df['sector'][0] #
+		df['Industry'] = profile_df['industry'][0] #
+		df['Market Cap (M)'] = profile_df['mktCap'][0] #
+		df['Market Cap (M)']= df['Market Cap (M)'].astype('float')/1000000 #
 		
-		fv_list = [profile_df['price'][0], dcf_df['dcf'][0]]
-		df['Market Premium (%)'] = (100*(profile_df['price'][0] - df['DCF Fair Value']) / profile_df['price'][0]).round(3) #     #min(fv_list)).round(3)
-		df['Market Premium (%)'] = df['Market Premium (%)'].replace(np.inf, np.nan)
-		df['Market Premium (%)'] =  df['Market Premium (%)'].replace(-np.inf, np.nan)
+		df['EV/EBITDA'] = metrics_df['enterpriseValueOverEBITDA'][0] #
+		df['Price / Earnings Ratio'] = metrics_df['peRatio'][0] #
+		if metrics_df['dividendYield'][0]: df['Dividend Yield (%)'] = metrics_df['dividendYield'][0]*100
+		df['Current Ratio'] = metrics_df['currentRatio'][0]
+		df['FCF Yield (%)'] = metrics_df['freeCashFlowYield'][0]*100
+		df['Debt to Equity'] = metrics_df['debtToEquity'][0]
+		df['ROE (%)'] = metrics_df['roe'][0]*100
+		df['Price / Book Ratio'] = metrics_df['pbRatio'][0]
 		
-		df['AJ Market Premium (%)'] = fv_df['Market Premium (%)'][0].round(3) #
-		df['AJ Market Premium (%)'] = df['AJ Market Premium (%)'].replace(-np.inf, np.nan)
-		df['AJ Market Premium (%)'] = df['AJ Market Premium (%)'].replace(np.inf, np.nan)
-		
-		df['Average Market Premium (%)'] = np.nanmean([df['AJ Market Premium (%)'][0], df['Market Premium (%)'][0]]).round(3) #    #((df['AJ Market Premium (%)']+df['Market Premium (%)'])/2).round(3)
+		df['Beta'] = profile_df['beta'][0] #
+		df['30 Day SP500 Correlation'] = getCorr_SP500(sym, 21) #
+		df['3 Month SP500 Correlation'] = getCorr_SP500(sym, 63)
+		df['1 Year SP500 Correlation'] = getCorr_SP500(sym, 253) #
+		df['3 Year SP500 Correlation'] = getCorr_SP500(sym, 759) #
+		df['10 Year SP500 Correlation'] = getCorr_SP500(sym, 2530)
+		df['Stock Price'] = profile_df['price'][0] #
+		if dcf_df['dcf'][0] == 0:
+			df['DCF Fair Value'] = np.nan
+		else:
+			df['DCF Fair Value'] = dcf_df['dcf'][0] #
+
+		if fv_df['Fair Value'][0] >=0:
+			df['AJ DCF Fair Value'] = fv_df['Fair Value'][0].round(3) #
+			df['AJ DCF Fair Value'] = df['AJ DCF Fair Value'].replace(-np.inf, np.nan)
+			df['AJ DCF Fair Value'] = df['AJ DCF Fair Value'].replace(np.inf, np.nan)
+			
+			fv_list = [profile_df['price'][0], dcf_df['dcf'][0]]
+			df['Market Premium (%)'] = (100*(profile_df['price'][0] - df['DCF Fair Value']) / profile_df['price'][0]).round(3) #     #min(fv_list)).round(3)
+			df['Market Premium (%)'] = df['Market Premium (%)'].replace(np.inf, np.nan)
+			df['Market Premium (%)'] =  df['Market Premium (%)'].replace(-np.inf, np.nan)
+			
+			df['AJ Market Premium (%)'] = fv_df['Market Premium (%)'][0].round(3) #
+			df['AJ Market Premium (%)'] = df['AJ Market Premium (%)'].replace(-np.inf, np.nan)
+			df['AJ Market Premium (%)'] = df['AJ Market Premium (%)'].replace(np.inf, np.nan)
+			
+			df['Average Market Premium (%)'] = np.nanmean([df['AJ Market Premium (%)'][0], df['Market Premium (%)'][0]]).round(3) #    #((df['AJ Market Premium (%)']+df['Market Premium (%)'])/2).round(3)
 
 
+		float_cols = ['Market Cap (M)', 'EV/EBITDA', 'Price / Earnings Ratio', 'Beta', '30 Day SP500 Correlation', '1 Year SP500 Correlation', '3 Year SP500 Correlation', 'Stock Price', 'DCF Fair Value', 'AJ DCF Fair Value', 'Market Premium (%)', 'AJ Market Premium (%)', 'Average Market Premium (%)', 'Dividend Yield (%)', 'Current Ratio', 'FCF Yield (%)', 'Debt to Equity', 'ROE (%)', 'Price / Book Ratio', '3 Month SP500 Correlation', '10 Year SP500 Correlation']
+		df[float_cols] = df[float_cols].astype('float').round(2)
+		df.reset_index(drop=True, inplace=True)
+
+		cols = ['Company', 
+			'Ticker',
+			'Exchange',
+			'Sector', 
+			'Industry',
+			'Market Cap (M)',
+			'EV/EBITDA', 
+			'Price / Earnings Ratio', 
+			'Beta',
+			'30 Day SP500 Correlation',
+			'3 Month SP500 Correlation',
+			'1 Year SP500 Correlation', 
+			'3 Year SP500 Correlation',
+			'10 Year SP500 Correlation',
+			'Stock Price',
+			'DCF Fair Value', 
+			'AJ DCF Fair Value',
+			'Market Premium (%)',
+			'AJ Market Premium (%)',
+			'Average Market Premium (%)',
+			'Dividend Yield (%)',
+			'Current Ratio',
+			'FCF Yield (%)',
+			'Debt to Equity',
+			'ROE (%)',
+			'Price / Book Ratio',
+		   ]
+
+		df = df[cols]
+		df = df.replace(-np.inf, np.nan)
+		df = df.replace(np.inf, np.nan)
 
 
-	#appending dataframes to json
-	df_jsonFile = jsonPath + 'df.json'
-	profile_df_jsonFile = jsonPath + 'profile_df.json'
-	dcf_df_jsonFile = jsonPath + 'dcf_df.json'
-	metrics_df_jsonFile = jsonPath + 'metrics_df.json'
-	fv_df_jsonFile = jsonPath + 'fv_df.json'
-
-	appendDF(df, df_jsonFile)
-	appendDF(profile_df, profile_df_jsonFile)
-	appendDF(dcf_df, dcf_df_jsonFile)
-	appendDF(metrics_df, metrics_df_jsonFile)
-	appendDF(fv_df, fv_df_jsonFile)
+		writeToFile(sym, df, 'summary')
+		writeToFile(sym, profile_df, 'profile')
+		writeToFile(sym, dcf_df, 'dcf')
+		writeToFile(sym, metrics_df, 'metrics')
+		writeToFile(sym, fv_df, 'fairValue')
 
 
-	# except Exception as ex:
-	# 	df = []
-	# 	print('AJ Function Analyze_simple_file() failed :' + sym)
+	except Exception as ex:
+		df = []
+		print('AJ Function Analyze_simple_file() failed :' + sym)
 
 	return
 
@@ -850,11 +899,11 @@ def deleteJsonFiles ():
 
 
 
-def Analyze_simple_wrapper (sym, exc):
+# def Analyze_simple_wrapper (sym, exc):
 
-	simp_dff_all = Analyze_simple_file(sym, exc)
+# 	simp_dff_all = Analyze_simple_file(sym, exc)
 
-	return
+# 	return
 
 
 
@@ -874,19 +923,18 @@ def Analyze_all_MP ():
 	try:
 
 		for i, row in symbols_df.iterrows():
-			simp_dff = []
 			simp_dff = pd.DataFrame()
 
 			sym = row.symbol
-			cname = row['name']
+			cname = row['companyName']
 			exc = row['exchange']
 
 
-			p = multiprocessing.Process(target=Analyze_simple_wrapper, args=(sym, exc,))
+			p = multiprocessing.Process(target=Analyze_simple_file, args=(sym, exc,))
 			processes.append(p)
 			p.start()
 
-			time.sleep(5)
+			time.sleep(4)
 
 			print([sym, cname])
 
@@ -894,78 +942,9 @@ def Analyze_all_MP ():
 			p.join()
 			
 	except:
-		print("Error " + row.symbol + ": " + row['name']+ "\n")
+		print("Error " + row.symbol + ": " + row['companyName']+ "\n")
 		#continue
 
-	df_jsonFile = jsonPath + 'df.json'
-	profile_df_jsonFile = jsonPath + 'profile_df.json'
-	dcf_df_jsonFile = jsonPath + 'dcf_df.json'
-	metrics_df_jsonFile = jsonPath + 'metrics_df.json'
-	fv_df_jsonFile = jsonPath + 'fv_df.json'
-
-	symbols_simp_df = pd.read_json(df_jsonFile)
-	symbols_prof_df = pd.read_json(profile_df_jsonFile)
-	symbols_dcf_df = pd.read_json(dcf_df_jsonFile)
-	symbols_met_df = pd.read_json(metrics_df_jsonFile)
-	symbols_f_df = pd.read_json(fv_df_jsonFile)
-
-			
-	float_cols = ['Market Cap (M)', 'EV/EBITDA', 'Price / Earnings Ratio', 'Beta', '30 Day SP500 Correlation', '1 Year SP500 Correlation', '3 Year SP500 Correlation', 'Stock Price', 'DCF Fair Value', 'AJ DCF Fair Value', 'Market Premium (%)', 'AJ Market Premium (%)', 'Average Market Premium (%)', 'Dividend Yield (%)', 'Current Ratio', 'FCF Yield (%)', 'Debt to Equity', 'ROE (%)', 'Price / Book Ratio', '3 Month SP500 Correlation', '10 Year SP500 Correlation']
-	symbols_simp_df[float_cols] = symbols_simp_df[float_cols].astype('float').round(2)
-	symbols_simp_df = symbols_simp_df.head(len(symbols_simp_df)).sort_values(by=['Market Cap (M)'], ascending=False)
-
-	#symbols_simp_df = symbols_simp_df[abs(symbols_simp_df['Average Market Premium (%)']) <= 500]
-	symbols_simp_df.reset_index(drop=True, inplace=True)
-
-	cols = ['Company', 
-		'Ticker',
-		'Exchange',
-		'Sector', 
-		'Industry',
-		'Market Cap (M)',
-		'EV/EBITDA', 
-		'Price / Earnings Ratio', 
-		'Beta',
-		'30 Day SP500 Correlation',
-		'3 Month SP500 Correlation',
-		'1 Year SP500 Correlation', 
-		'3 Year SP500 Correlation',
-		'10 Year SP500 Correlation',
-		'Stock Price',
-		'DCF Fair Value', 
-		'AJ DCF Fair Value',
-		'Market Premium (%)',
-		'AJ Market Premium (%)',
-		'Average Market Premium (%)',
-		'Dividend Yield (%)',
-		'Current Ratio',
-		'FCF Yield (%)',
-		'Debt to Equity',
-		'ROE (%)',
-		'Price / Book Ratio',
-	   ]
-
-	df = symbols_simp_df[cols]
-	df = df.replace(-np.inf, np.nan)
-	df = df.replace(np.inf, np.nan)
-
-
-	#ts = datetime.strftime(datetime.utcnow(), '%Y-%m-%dT%H-%M-%S')
-	ts = datetime.strftime(datetime.now(), '%Y-%m-%d')
-
-	df_jsonFile_new = df_jsonFile.replace('.json', '_'+ts+'.json')
-	profile_df_jsonFile = profile_df_jsonFile.replace('.json', '_'+ts+'.json')
-	dcf_df_jsonFile = dcf_df_jsonFile.replace('.json', '_'+ts+'.json')
-	metrics_df_jsonFile = metrics_df_jsonFile.replace('.json', '_'+ts+'.json')
-	fv_df_jsonFile = fv_df_jsonFile.replace('.json', '_'+ts+'.json')
-
-
-	df.to_json(df_jsonFile_new)
-	symbols_prof_df.to_json(profile_df_jsonFile)
-	symbols_dcf_df.to_json(dcf_df_jsonFile)
-	symbols_met_df.to_json(metrics_df_jsonFile)
-	symbols_f_df.to_json(fv_df_jsonFile)
-	
 	return 
 
 
