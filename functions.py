@@ -114,20 +114,30 @@ def getAllSymbols ():
 
 
 def getAllScreenedSymbols ():
-	try:
-		
-		screen = 'NYSE,NASDAQ'
-		url = 'https://financialmodelingprep.com/api/v3/stock-screener?exchange=' + screen + '&apikey=6b9e3543ba839a1f8179c1365b6e2e8f'
+    try:
 
-		data = urlopen(url).read().decode('utf-8')
+	    screen = 'NYSE,NASDAQ'
+	    url = 'https://financialmodelingprep.com/api/v3/stock-screener?exchange=' + screen + '&apikey=6b9e3543ba839a1f8179c1365b6e2e8f'
 
-		js = json.loads(data)
-		df = pd.DataFrame(js)
-		
+	    data = urlopen(url).read().decode('utf-8')
+
+	    js = json.loads(data)
+	    df = pd.DataFrame(js)
+	    
+	    listOfSymbols = pd.unique(df.symbol).tolist()
+	    listOfScreenedSymbols = []
+	    for sym in listOfSymbols:
+	        if checkDates(sym):
+	            listOfScreenedSymbols.append(sym)
+	            
+	    df_new = df[df.symbol.isin(listOfScreenedSymbols)]
+	    df_new.reset_index(drop=True, inplace=True)
+
 	except:
-		df = []
-		print('AJ Function getAllScreenedSymbols() failed')
-	return df
+	    df_new = pd.DataFrame()
+	    print('AJ Function getAllScreenedSymbols() failed')
+	    
+    return df_new
 
 
 
@@ -898,6 +908,29 @@ def deleteJsonFiles ():
 
 
 
+def checkDates (sym):
+    try:
+	    chkDate = True
+	    outputPath = outPath
+	    #dirList = [x for x in os.listdir(outputPath)]
+	    dirName = outputPath + sym
+	    if os.path.isdir(dirName):
+		    dt = datetime.fromtimestamp(os.path.getmtime(dirName))
+
+		    curDt = datetime.now()
+		    if dt + timedelta(days=6) > curDt:
+		    	#print(sym, dt, dt + timedelta(days=6), curDt)
+		    	chkDate = False
+    except:
+        chkDate = True
+        print('AJ Function checkDates() Failed')
+    
+    return chkDate
+
+
+
+
+
 
 # def Analyze_simple_wrapper (sym, exc):
 
@@ -934,7 +967,7 @@ def Analyze_all_MP ():
 			processes.append(p)
 			p.start()
 
-			time.sleep(4)
+			time.sleep(5)
 
 			print([sym, cname])
 

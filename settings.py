@@ -7,4 +7,4 @@ jsonPath = rootDir + 'stockvenv/'
 
 outPath = rootDir + 'OUTPUT/'
 
-n_securities = 40   #8907
+n_securities = 3   #8907
