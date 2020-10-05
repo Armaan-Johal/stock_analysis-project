@@ -9,4 +9,5 @@ outPath = rootDir + 'OUTPUT/'
 
 failedSymbolFile = rootDir + 'failedSymbols.json'
 
-n_securities = 20   #8907
+n_securities = 10   #8907
+sleepSeconds = 4
