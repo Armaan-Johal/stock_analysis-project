@@ -7,4 +7,6 @@ jsonPath = rootDir + 'stockvenv/'
 
 outPath = rootDir + 'OUTPUT/'
 
-n_securities = 3   #8907
+failedSymbolFile = rootDir + 'failedSymbols.json'
+
+n_securities = 20   #8907

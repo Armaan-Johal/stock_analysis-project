@@ -1,6 +1,8 @@
 from imports import *
 from settings import *
 
+failedSymbolsList = []
+
 
 def checkURL (sym):
 
@@ -114,6 +116,7 @@ def getAllSymbols ():
 
 
 def getAllScreenedSymbols ():
+
 	try:
 
 		screen = 'NYSE,NASDAQ'
@@ -124,14 +127,27 @@ def getAllScreenedSymbols ():
 		js = json.loads(data)
 		df = pd.DataFrame(js)
 		
+		#screening for previously run symbols (in the last 7 days)
 		listOfSymbols = pd.unique(df.symbol).tolist()
 		listOfScreenedSymbols = []
 		for sym in listOfSymbols:
 			if checkDates(sym):
 				listOfScreenedSymbols.append(sym)
+
+		listOfScreenedSymbols = random.shuffle(listOfScreenedSymbols)
 				
 		df_new = df[df.symbol.isin(listOfScreenedSymbols)]
 		df_new.reset_index(drop=True, inplace=True)
+
+		#screening for failed symbols
+		# in_file = open(failedSymbolFile, "r")
+		# failedSymbols = list(json.load(in_file))
+		# in_file.close()
+
+		# df_new2 = df_new[~df_new.symbol.isin(failedSymbols)]
+		# df_new2.reset_index(drop=True, inplace=True)
+
+
 
 	except:
 		df_new = pd.DataFrame()
@@ -745,6 +761,8 @@ def writeToFile(sym, df, nm):
 
 
 def Analyze_simple_file (sym, exc):
+
+	global failedSymbolsList
 	
 	try:
 		df = pd.DataFrame(index=range(1))
@@ -846,6 +864,7 @@ def Analyze_simple_file (sym, exc):
 	except Exception as ex:
 		df = []
 		print('AJ Function Analyze_simple_file() failed :' + sym)
+		failedSymbolsList.append(sym)
 
 	return
 
@@ -942,6 +961,7 @@ def checkDates (sym):
 
 def Analyze_all_MP ():
 
+	global failedSymbolsList
 
 	symbols_df = getAllScreenedSymbols().head(n_securities)
 	symbols_simp_df = pd.DataFrame()
@@ -977,6 +997,12 @@ def Analyze_all_MP ():
 	except:
 		print("Error " + row.symbol + ": " + row['companyName']+ "\n")
 		#continue
+
+	finally:
+
+		out_file = open(failedSymbolFile, "w")
+		json.dump(failedSymbolsList, out_file)
+		out_file.close()
 
 	return 
 
