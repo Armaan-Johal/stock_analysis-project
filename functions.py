@@ -117,41 +117,41 @@ def getAllSymbols ():
 
 def getAllScreenedSymbols ():
 
-	try:
+	#try:
 
-		screen = 'NYSE,NASDAQ'
-		url = 'https://financialmodelingprep.com/api/v3/stock-screener?exchange=' + screen + '&apikey=6b9e3543ba839a1f8179c1365b6e2e8f'
+	screen = 'NYSE,NASDAQ'
+	url = 'https://financialmodelingprep.com/api/v3/stock-screener?exchange=' + screen + '&apikey=6b9e3543ba839a1f8179c1365b6e2e8f'
 
-		data = urlopen(url).read().decode('utf-8')
+	data = urlopen(url).read().decode('utf-8')
 
-		js = json.loads(data)
-		df = pd.DataFrame(js)
-		
-		#screening for previously run symbols (in the last 7 days)
-		listOfSymbols = pd.unique(df.symbol).tolist()
-		listOfScreenedSymbols = []
-		for sym in listOfSymbols:
-			if checkDates(sym):
-				listOfScreenedSymbols.append(sym)
+	js = json.loads(data)
+	df = pd.DataFrame(js)
+	
+	#screening for previously run symbols (in the last 7 days)
+	listOfSymbols = pd.unique(df.symbol).tolist()
+	listOfScreenedSymbols = []
+	for sym in listOfSymbols:
+		if checkDates(sym):
+			listOfScreenedSymbols.append(sym)
 
-		listOfScreenedSymbols = random.shuffle(listOfScreenedSymbols)
-				
-		df_new = df[df.symbol.isin(listOfScreenedSymbols)]
-		df_new.reset_index(drop=True, inplace=True)
+	random.shuffle(listOfScreenedSymbols)
+			
+	df_new = df[df.symbol.isin(listOfScreenedSymbols)]
+	df_new.reset_index(drop=True, inplace=True)
 
-		#screening for failed symbols
-		# in_file = open(failedSymbolFile, "r")
-		# failedSymbols = list(json.load(in_file))
-		# in_file.close()
+	#screening for failed symbols
+	# in_file = open(failedSymbolFile, "r")
+	# failedSymbols = list(json.load(in_file))
+	# in_file.close()
 
-		# df_new2 = df_new[~df_new.symbol.isin(failedSymbols)]
-		# df_new2.reset_index(drop=True, inplace=True)
+	# df_new2 = df_new[~df_new.symbol.isin(failedSymbols)]
+	# df_new2.reset_index(drop=True, inplace=True)
 
 
 
-	except:
-		df_new = pd.DataFrame()
-		print('AJ Function getAllScreenedSymbols() failed')
+	# except:
+	# 	df_new = pd.DataFrame()
+	# 	print('AJ Function getAllScreenedSymbols() failed')
 		
 	return df_new
 
